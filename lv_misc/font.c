@@ -17,6 +17,7 @@
 #include "fonts/dejavu_40.h"
 #include "fonts/dejavu_60.h"
 #include "fonts/dejavu_80.h"
+#include "fonts/dejavu_120.h"
 #include "fonts/symbol_30.h"
 #include "fonts/symbol_60.h"
 
@@ -101,6 +102,12 @@ const font_t * font_get(font_types_t font_id)
 #if USE_FONT_DEJAVU_80 != 0
         case FONT_DEJAVU_80:
             font_p = dejavu_80_get_dsc();
+            break;
+#endif
+
+#if USE_FONT_DEJAVU_120 != 0
+        case FONT_DEJAVU_120:
+            font_p = dejavu_120_get_dsc();
             break;
 #endif
 
