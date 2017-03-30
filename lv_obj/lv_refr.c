@@ -90,7 +90,8 @@ void lv_inv_area(const area_t * area_p)
     /*The area is truncated to the screen*/
     if(suc != false)
     {
-#if LV_DOWNSCALE == 2
+        /*Antialiassing prefers the even width and height */
+#if LV_ANTIALIAS != 0
     	/*Rounding*/
     	com_area.x1 = com_area.x1 & (~0x1);
     	com_area.y1 = com_area.y1 & (~0x1);
@@ -289,7 +290,7 @@ static void lv_refr_area_part_vdb(const area_t * area_p)
  * Search the most top object which fully covers an area
  * @param area_p pointer to an area
  * @param obj the first object to start the searching (typically a screen)
- * @return 
+ * @return pointer to the top object on 'area_p' from 'obj'
  */
 static lv_obj_t * lv_refr_get_top_obj(const area_t * area_p, lv_obj_t * obj)
 {
@@ -299,7 +300,9 @@ static lv_obj_t * lv_refr_get_top_obj(const area_t * area_p, lv_obj_t * obj)
     /*If this object is fully cover the draw area check the children too */
     if(area_is_in(area_p, &obj->cords) && obj->hidden == 0)
     {
-        LL_READ(obj->child_ll, i)        {
+        lv_style_t * style = lv_obj_get_style(obj);
+        LL_READ(obj->child_ll, i) {
+            lv_style_inherit(lv_obj_get_style(i), lv_obj_get_style(i), style); /*Inherit the object style to children*/
             found_p = lv_refr_get_top_obj(area_p, i);
             
             /*If a children is ok then break*/
@@ -310,8 +313,7 @@ static lv_obj_t * lv_refr_get_top_obj(const area_t * area_p, lv_obj_t * obj)
         
         /*If no better children check this object*/
         if(found_p == NULL) {
-            if(obj->opa == OPA_COVER &&
-               LV_SA(obj, lv_objs_t)->transp == 0 &&
+            if(style->opa == OPA_COVER &&
                obj->design_f(obj, area_p, LV_DESIGN_COVER_CHK) != false) {
                 found_p = obj;
             }
@@ -333,10 +335,12 @@ static void lv_refr_make(lv_obj_t * top_p, const area_t * mask_p)
      * In this case use the screen directly */
     if(top_p == NULL) top_p = lv_scr_act();
     
-    /*Refresh the top object and its children*/
+    /* Refresh the top object and its children.
+     * The style of 'top_p' is already loaded during 'lv_refr_get_top_obj'*/
+    lv_obj_load_style(top_p);
     lv_refr_obj(top_p, mask_p);
     
-    /*Draw the 'younger' sibling objects because they can be on top_obj */
+    /*Draw the 'younger' sibling objects because they can be partially on top_obj */
     lv_obj_t * par;
     lv_obj_t * i;
     lv_obj_t * border_p = top_p;
@@ -350,20 +354,23 @@ static void lv_refr_make(lv_obj_t * top_p, const area_t * mask_p)
 
         while(i != NULL) { 
             /*Refresh the objects*/
+            lv_obj_load_style(i);  /*Get the inherited style of the object*/
             lv_refr_obj(i, mask_p);
             i = ll_get_prev(&(par->child_ll), i);
         }  
         
-        /*The new border will be there last parents,
-         *so the 'younger' brothers of parent will be refreshed*/
+        /*The new border will be thelast parents,
+         *so now 'younger' brothers of parent will be refreshed*/
         border_p = par;
         /*Go a level deeper*/
         par = lv_obj_get_parent(par);
     }
 
     /*Call the post draw design function of the parents of the to object*/
+    /*TODO post draw function calling should be started from the screen like every other drawing*/
     par = lv_obj_get_parent(top_p);
     while(par != NULL) {
+        lv_obj_load_style(par);  /*Get the inherited style of the object*/
         par->design_f(par, mask_p, LV_DESIGN_DRAW_POST);
         par = lv_obj_get_parent(par);
     }
@@ -395,17 +402,18 @@ static void lv_refr_obj(lv_obj_t * obj, const area_t * mask_ori_p)
     
     /*Draw the parent and its children only if they ore on 'mask_parent'*/
     if(union_ok != false) {
+        lv_style_t * style = lv_obj_get_style(obj);
 
         /* Redraw the object */    
-        if(obj->opa != OPA_TRANSP && LV_SA(obj, lv_objs_t)->transp == 0) {
+        if(style->opa != OPA_TRANSP) {
             obj->design_f(obj, &obj_ext_mask, LV_DESIGN_DRAW_MAIN);
-           /* tick_wait_ms(100); */ /*DEBUG: Wait after every object draw to see the order of drawing*/
         }
 
         /*Create a new 'obj_mask' without 'ext_size' because the children can't be visible there*/
         lv_obj_get_cords(obj, &obj_area);
         union_ok = area_union(&obj_mask, mask_ori_p, &obj_area);
         if(union_ok != false) {
+
 			area_t mask_child; /*Mask from obj and its child*/
 			lv_obj_t * child_p;
 			area_t child_area;
@@ -423,6 +431,8 @@ static void lv_refr_obj(lv_obj_t * obj, const area_t * mask_ori_p)
 
 				/*If the parent and the child has common area then refresh the child */
 				if(union_ok) {
+		            /*Inherit the children style*/
+		            lv_style_inherit(lv_obj_get_style(child_p), lv_obj_get_style(child_p), style);
 					/*Refresh the next children*/
 					lv_refr_obj(child_p, &mask_child);
 				}
@@ -430,7 +440,7 @@ static void lv_refr_obj(lv_obj_t * obj, const area_t * mask_ori_p)
         }
 
         /* If all the children are redrawn make 'post draw' design */
-		if(obj->opa != OPA_TRANSP && LV_SA(obj, lv_objs_t)->transp == 0) {
+		if(style->opa != OPA_TRANSP) {
 		  obj->design_f(obj, &obj_ext_mask, LV_DESIGN_DRAW_POST);
 		}
     }

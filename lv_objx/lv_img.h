@@ -56,7 +56,7 @@ typedef struct
 	/*New style element for this type */
 	opa_t recolor_opa;                /*Intensity of recoloring (OPA_TRANSP, OPA_10 ... OPA_COVER)*/
 #if LV_IMG_ENABLE_SYMBOLS != 0
-    font_types_t sym_font;            /*Symbol font*/
+    font_name_t sym_font;            /*Symbol font*/
 #endif
 }lv_imgs_t;
 

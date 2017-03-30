@@ -265,10 +265,10 @@ static void lv_cbs_init(void)
 	lv_cbs_def.bullet.bcolor[LV_BTN_STATE_TGL_REL] = COLOR_WHITE;
 	lv_cbs_def.bullet.flags[LV_BTN_STATE_TGL_REL].light_en = 1;
 
-	lv_cbs_def.bullet.mcolor[LV_BTN_STATE_TGL_PR] = COLOR_MAKE(0x50, 0x70, 0x90);
-	lv_cbs_def.bullet.gcolor[LV_BTN_STATE_TGL_PR] = COLOR_MAKE(0x20, 0x30, 0x40);
-	lv_cbs_def.bullet.bcolor[LV_BTN_STATE_TGL_PR] = COLOR_WHITE;
-	lv_cbs_def.bullet.flags[LV_BTN_STATE_TGL_PR].light_en = 1;
+	lv_cbs_def.bullet.mcolor[LV_BTN_STATE_TPR] = COLOR_MAKE(0x50, 0x70, 0x90);
+	lv_cbs_def.bullet.gcolor[LV_BTN_STATE_TPR] = COLOR_MAKE(0x20, 0x30, 0x40);
+	lv_cbs_def.bullet.bcolor[LV_BTN_STATE_TPR] = COLOR_WHITE;
+	lv_cbs_def.bullet.flags[LV_BTN_STATE_TPR].light_en = 1;
 
 	lv_cbs_def.bullet.mcolor[LV_BTN_STATE_INA] = COLOR_SILVER;
 	lv_cbs_def.bullet.gcolor[LV_BTN_STATE_INA] = COLOR_GRAY;

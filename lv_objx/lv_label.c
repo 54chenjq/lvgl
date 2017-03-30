@@ -47,17 +47,12 @@
 /**********************
  *  STATIC PROTOTYPES
  **********************/
-static bool lv_label_design(lv_obj_t * label, const area_t * mask, lv_design_mode_t mode);
+static bool lv_label_design(lv_obj_t * label, const area_t * mask,  lv_design_mode_t mode);
 static void lv_label_refr_text(lv_obj_t * label);
-static void lv_labels_init(void);
 
 /**********************
  *  STATIC VARIABLES
  **********************/
-static lv_labels_t lv_labels_def;
-static lv_labels_t lv_labels_btn;
-static lv_labels_t lv_labels_title;
-static lv_labels_t lv_labels_txt;
 
 /**********************
  *      MACROS
@@ -95,9 +90,8 @@ lv_obj_t * lv_label_create(lv_obj_t * par, lv_obj_t * copy)
 
     /*Init the new label*/
     if(copy == NULL) {
-		lv_obj_set_opa(new_label, OPA_COVER);
+        lv_obj_set_style(new_label, lv_style_get(LV_STYLE_WEAK));
 		lv_obj_set_click(new_label, false);
-		lv_obj_set_style(new_label, lv_labels_get(LV_LABELS_DEF, NULL));
 		lv_label_set_long_mode(new_label, LV_LABEL_LONG_EXPAND);
 		lv_label_set_text(new_label, "Text");
     }
@@ -120,6 +114,7 @@ lv_obj_t * lv_label_create(lv_obj_t * par, lv_obj_t * copy)
  * Signal function of the label
  * @param label pointer to a label object
  * @param sign a signal type from lv_signal_t enum
+ * @param style the current style of the object (after inherited from the parents)
  * @param param pointer to a signal specific variable
  */
 bool lv_label_signal(lv_obj_t * label, lv_signal_t sign, void * param)
@@ -356,8 +351,10 @@ void lv_label_get_letter_pos(lv_obj_t * label, uint16_t index, point_t * pos)
     uint32_t line_start = 0;
     uint32_t new_line_start = 0;
     cord_t max_w = lv_obj_get_width(label);
-    lv_labels_t * labels = lv_obj_get_style(label);
-    const font_t * font = font_get(labels->font);
+    const font_t * font = lv_obj_get_font(label);
+    cord_t letter_space = lv_obj_get_letter_space(label);
+    cord_t line_space = lv_obj_get_line_space(label);
+    uint8_t align = lv_obj_get_txt_align(label);
     uint8_t letter_height = font_get_height(font) >> LV_FONT_ANTIALIAS;
     cord_t y = 0;
     txt_flag_t flag = TXT_FLAG_NONE;
@@ -371,15 +368,15 @@ void lv_label_get_letter_pos(lv_obj_t * label, uint16_t index, point_t * pos)
 
     /*Search the line of the index letter */;
     while (text[new_line_start] != '\0') {
-        new_line_start += txt_get_next_line(&text[line_start], font, labels->letter_space, max_w, flag);
+        new_line_start += txt_get_next_line(&text[line_start], font, letter_space, max_w, flag);
         if(index < new_line_start || text[new_line_start] == '\0') break; /*The line of 'index' letter begins at 'line_start'*/
 
-        y += letter_height + labels->line_space;
+        y += letter_height + line_space;
         line_start = new_line_start;
     }
 
     if((text[index - 1] == '\n' || text[index - 1] == '\r') && text[index] == '\0') {
-        y += letter_height + labels->line_space;
+        y += letter_height + line_space;
         line_start = index;
     }
 
@@ -395,13 +392,13 @@ void lv_label_get_letter_pos(lv_obj_t * label, uint16_t index, point_t * pos)
             }
         }
 
-		x += (font_get_width(font, text[i]) >> LV_FONT_ANTIALIAS) + labels->letter_space;
+		x += (font_get_width(font, text[i]) >> LV_FONT_ANTIALIAS) + letter_space;
 	}
 
-	if(labels->mid != 0) {
+	if(align != 0) {
 		cord_t line_w;
         line_w = txt_get_width(&text[line_start], new_line_start - line_start,
-                               font, labels->letter_space, flag);
+                               font, letter_space, flag);
 		x += lv_obj_get_width(label) / 2 - line_w / 2;
     }
 
@@ -423,8 +420,10 @@ uint16_t lv_label_get_letter_on(lv_obj_t * label, point_t * pos)
     uint32_t line_start = 0;
     uint32_t new_line_start = 0;
     cord_t max_w = lv_obj_get_width(label);
-    lv_labels_t * style = lv_obj_get_style(label);
-    const font_t * font = font_get(style->font);
+    const font_t * font = lv_obj_get_font(label);
+    cord_t letter_space = lv_obj_get_letter_space(label);
+    cord_t line_space = lv_obj_get_line_space(label);
+    uint8_t align = lv_obj_get_txt_align(label);
     uint8_t letter_height = font_get_height(font) >> LV_FONT_ANTIALIAS;
     cord_t y = 0;
     txt_flag_t flag = TXT_FLAG_NONE;
@@ -438,18 +437,18 @@ uint16_t lv_label_get_letter_on(lv_obj_t * label, point_t * pos)
 
     /*Search the line of the index letter */;
     while (text[line_start] != '\0') {
-    	new_line_start += txt_get_next_line(&text[line_start], font, style->letter_space, max_w, flag);
-    	if(pos->y <= y + letter_height + style->line_space) break; /*The line is found ('line_start')*/
-    	y += letter_height + style->line_space;
+    	new_line_start += txt_get_next_line(&text[line_start], font, letter_space, max_w, flag);
+    	if(pos->y <= y + letter_height + line_space) break; /*The line is found ('line_start')*/
+    	y += letter_height + line_space;
         line_start = new_line_start;
     }
 
     /*Calculate the x coordinate*/
     cord_t x = 0;
-	if(style->mid != 0) {
+	if(align != 0) {
 		cord_t line_w;
         line_w = txt_get_width(&text[line_start], new_line_start - line_start,
-                               font, style->letter_space, flag);
+                               font, letter_space, flag);
 		x += lv_obj_get_width(label) / 2 - line_w / 2;
     }
 
@@ -463,57 +462,13 @@ uint16_t lv_label_get_letter_on(lv_obj_t * label, point_t * pos)
             }
 	    }
 
-		x += (font_get_width(font, text[i]) >> LV_FONT_ANTIALIAS) + style->letter_space;
+		x += (font_get_width(font, text[i]) >> LV_FONT_ANTIALIAS) + letter_space;
 		if(pos->x < x) break;
 	}
 
 
 	return i;
 }
-
-/**
- * Return with a pointer to a built-in style and/or copy it to a variable
- * @param style a style name from lv_labels_builtin_t enum
- * @param copy copy the style to this variable. (NULL if unused)
- * @return pointer to an lv_labels_t style
- */
-lv_labels_t * lv_labels_get(lv_labels_builtin_t style, lv_labels_t * copy)
-{
-	static bool style_inited = false;
-
-	/*Make the style initialization if it is not done yet*/
-	if(style_inited == false) {
-		lv_labels_init();
-		style_inited = true;
-	}
-
-	lv_labels_t * style_p;
-
-	switch(style) {
-		case LV_LABELS_DEF:
-			style_p = &lv_labels_def;
-			break;
-		case LV_LABELS_BTN:
-			style_p = &lv_labels_btn;
-			break;
-		case LV_LABELS_TXT:
-			style_p = &lv_labels_txt;
-			break;
-		case LV_LABELS_TITLE:
-			style_p = &lv_labels_title;
-			break;
-		default:
-			style_p = &lv_labels_def;
-	}
-
-	if(copy != NULL) {
-		if(style_p != NULL) memcpy(copy, style_p, sizeof(lv_labels_t));
-		else memcpy(copy, &lv_labels_def, sizeof(lv_labels_t));
-	}
-
-	return style_p;
-}
-
 
 /**********************
  *   STATIC FUNCTIONS
@@ -523,13 +478,14 @@ lv_labels_t * lv_labels_get(lv_labels_builtin_t style, lv_labels_t * copy)
  * Handle the drawing related tasks of the labels
  * @param label pointer to a label object
  * @param mask the object will be drawn only in this area
+ * @param style the current style of the object (after inherited from the parents)
  * @param mode LV_DESIGN_COVER_CHK: only check if the object fully covers the 'mask_p' area
  *                                  (return 'true' if yes)
  *             LV_DESIGN_DRAW: draw the object (always return 'true')
  *             LV_DESIGN_DRAW_POST: drawing after every children are drawn
  * @param return true/false, depends on 'mode'
  */
-static bool lv_label_design(lv_obj_t * label, const area_t * mask, lv_design_mode_t mode)
+static bool lv_label_design(lv_obj_t * label, const area_t * mask,  lv_design_mode_t mode)
 {
     /* A label never covers an area */
     if(mode == LV_DESIGN_COVER_CHK) return false;
@@ -537,15 +493,14 @@ static bool lv_label_design(lv_obj_t * label, const area_t * mask, lv_design_mod
 		/*TEST: draw a background for the label*/
 		//lv_vfill(&label->cords, mask, COLOR_LIME, OPA_COVER);
 
+        lv_style_t * style = lv_obj_get_style(label);
 		area_t cords;
 		lv_obj_get_cords(label, &cords);
-		opa_t opa = lv_obj_get_opa(label);
 		lv_label_ext_t * ext = lv_obj_get_ext(label);
 		txt_flag_t flag = TXT_FLAG_NONE;
 		if(ext->recolor != 0) flag |= TXT_FLAG_RECOLOR;
 
-
-		lv_draw_label(&cords, mask, lv_obj_get_style(label), opa, ext->txt, flag);
+		lv_draw_label(&cords, mask, style, style->opa, ext->txt, flag);
 
 
     }
@@ -563,8 +518,9 @@ static void lv_label_refr_text(lv_obj_t * label)
     if(ext->txt == NULL) return;
 
     cord_t max_w = lv_obj_get_width(label);
-    lv_labels_t * style = lv_obj_get_style(label);
-    const font_t * font = font_get(style->font);
+    const font_t * font = lv_obj_get_font(label);
+    cord_t letter_space = lv_obj_get_letter_space(label);
+    cord_t line_space = lv_obj_get_line_space(label);
 
     ext->dot_end = LV_LABEL_DOT_END_INV;    /*Initialize the dot end index*/
 
@@ -577,7 +533,7 @@ static void lv_label_refr_text(lv_obj_t * label)
     point_t size;
     txt_flag_t flag = TXT_FLAG_NONE;
     if(ext->recolor != 0) flag |= TXT_FLAG_RECOLOR;
-    txt_get_size(&size, ext->txt, font, style->letter_space, style->line_space, max_w, flag);
+    txt_get_size(&size, ext->txt, font, letter_space, line_space, max_w, flag);
 
     /*Refresh the full size in expand mode*/
     if(ext->long_mode == LV_LABEL_LONG_EXPAND || ext->long_mode == LV_LABEL_LONG_SCROLL) {
@@ -670,33 +626,4 @@ static void lv_label_refr_text(lv_obj_t * label)
     lv_obj_inv(label);
 }
 
-/**
- * Initialize the label styles
- */
-static void lv_labels_init(void)
-{
-	/*Default style*/
-	lv_labels_def.font = LV_FONT_DEFAULT;
-	lv_labels_def.objs.color = COLOR_MAKE(0x10, 0x18, 0x20);
-	lv_labels_def.letter_space = 2 * LV_DOWNSCALE;
-	lv_labels_def.line_space =  2 * LV_DOWNSCALE;
-	lv_labels_def.mid =  0;
-
-	memcpy(&lv_labels_btn, &lv_labels_def, sizeof(lv_labels_t));
-	lv_labels_btn.objs.color = COLOR_MAKE(0xd0, 0xe0, 0xf0);
-	lv_labels_btn.mid =  1;
-
-	memcpy(&lv_labels_title, &lv_labels_def, sizeof(lv_labels_t));
-	lv_labels_title.objs.color = COLOR_MAKE(0x10, 0x20, 0x30);
-	lv_labels_title.letter_space = 4 * LV_DOWNSCALE;
-	lv_labels_title.line_space =  4 * LV_DOWNSCALE;
-	lv_labels_title.mid =  0;
-
-	memcpy(&lv_labels_txt, &lv_labels_def, sizeof(lv_labels_t));
-	lv_labels_txt.objs.color = COLOR_MAKE(0x16, 0x23, 0x34);
-	lv_labels_txt.letter_space = 0 * LV_DOWNSCALE;
-	lv_labels_txt.line_space =  1 * LV_DOWNSCALE;
-	lv_labels_txt.mid =  0;
-
-}
 #endif

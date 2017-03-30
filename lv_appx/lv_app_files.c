@@ -281,21 +281,21 @@ static void my_conf_open(lv_app_inst_t * app, lv_obj_t * conf_win)
     lv_obj_set_free_num(cb, SEND_SETTINGS_FN);
     lv_obj_set_free_p(cb, app);
     lv_btn_set_rel_action(cb, win_send_settings_element_rel_action);
-    if(app_data->send_fn != 0) lv_btn_set_state(cb, LV_BTN_STATE_TGL_REL);
+    if(app_data->send_fn != 0) lv_btn_set_state(cb, LV_BTN_STATE_TREL);
     else lv_btn_set_state(cb, LV_BTN_STATE_REL);
 
     /*Send size check box*/
     cb = lv_cb_create(conf_win, cb);
     lv_cb_set_text(cb, "Send size");
     lv_obj_set_free_num(cb, SEND_SETTINGS_SIZE);
-    if(app_data->send_size != 0) lv_btn_set_state(cb, LV_BTN_STATE_TGL_REL);
+    if(app_data->send_size != 0) lv_btn_set_state(cb, LV_BTN_STATE_TREL);
     else lv_btn_set_state(cb, LV_BTN_STATE_REL);
 
     /*Send CRC check box*/
     cb = lv_cb_create(conf_win, cb);
     lv_cb_set_text(cb, "Send CRC");
     lv_obj_set_free_num(cb, SEND_SETTINGS_CRC);
-    if(app_data->send_crc != 0) lv_btn_set_state(cb, LV_BTN_STATE_TGL_REL);
+    if(app_data->send_crc != 0) lv_btn_set_state(cb, LV_BTN_STATE_TREL);
     else lv_btn_set_state(cb, LV_BTN_STATE_REL);
 
     /*Create a text area the type chunk size*/

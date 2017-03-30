@@ -58,7 +58,7 @@ typedef enum
     FONT_SYMBOL_60,
 #endif
     FONT_TYPE_NUM,
-}font_types_t;
+}font_name_t;
 
 typedef struct
 {
@@ -80,7 +80,7 @@ typedef struct
  * @param font_id: the id of a font (an element of font_types_t enum)
  * @return pointer to a font descriptor
  */
-const font_t * font_get(font_types_t font_id);
+const font_t * font_get(font_name_t font_id);
 
 
 /**

@@ -28,6 +28,15 @@
  *      TYPEDEFS
  **********************/
 
+/*Scrollbar modes: shows when should the scrollbars be visible*/
+typedef enum
+{
+    LV_PAGE_SB_MODE_OFF,    /*Never show scrollbars*/
+    LV_PAGE_SB_MODE_ON,     /*Always show scrollbars*/
+    LV_PAGE_SB_MODE_DRAG,   /*Show scrollbars when page is being dragged*/
+    LV_PAGE_SB_MODE_AUTO,   /*Show scrollbars when the scrollable rect. is large enough to be scrolled*/
+}lv_page_sb_mode_t;
+
 /*Data of page*/
 typedef struct
 {
@@ -36,40 +45,14 @@ typedef struct
     lv_obj_t * scrl;            /*The scrollable object on the background*/
     lv_action_t rel_action;     /*Release action*/
     lv_action_t pr_action;      /*Press action*/
+    lv_style_t * scrl_style;
+    lv_style_t * sb_style;
+    lv_page_sb_mode_t sb_mode;
     area_t sbh;                 /*Horizontal scrollbar area (relative to the page) */
     area_t sbv;                 /*Vertical scrollbar area (relative to the page)*/
     uint8_t sbh_draw :1;        /*1: horizontal scrollbar is visible now*/
     uint8_t sbv_draw :1;        /*1: vertical scrollbar is visible now*/
 }lv_page_ext_t;
-
-/*Scrollbar modes: shows when should the scrollbars be visible*/
-typedef enum
-{
-	LV_PAGE_SB_MODE_OFF,    /*Never show scrollbars*/
-	LV_PAGE_SB_MODE_ON,     /*Always show scrollbars*/
-	LV_PAGE_SB_MODE_DRAG,   /*Show scrollbars when page is being dragged*/
-    LV_PAGE_SB_MODE_AUTO,   /*Show scrollbars when the scrollable rect. is large enough to be scrolled*/
-}lv_page_sb_mode_t;
-
-/*Style of page*/
-typedef struct
-{
-    lv_rects_t bg_rects;  /*Style of ancestor*/
-	/*New style element for this type */
-    lv_rects_t scrl_rects;  /*Style of the scrollable rectangle*/
-    lv_rects_t sb_rects;    /*Style of scrollbars*/
-    cord_t sb_width;        /*Width of the scrollbars*/
-    lv_page_sb_mode_t sb_mode; /*Scrollbar visibility from 'lv_page_sb_mode_t'*/
-    uint8_t sb_opa;         /*Opacity of scrollbars in percentage of object opacity (0..100)*/
-}lv_pages_t;
-
-/*Built-in styles of page*/
-typedef enum
-{
-	LV_PAGES_DEF,
-    LV_PAGES_SIMPLE,
-	LV_PAGES_TRANSP,
-}lv_pages_builtin_t;
 
 /**********************
  * GLOBAL PROTOTYPES
@@ -126,14 +109,6 @@ void lv_page_focus(lv_obj_t * page, lv_obj_t * obj, bool anim_en);
  * @return pointer to rectangle which is the scrollable part of the page
  */
 lv_obj_t * lv_page_get_scrl(lv_obj_t * page);
-
-/**
- * Return with a pointer to a built-in style and/or copy it to a variable
- * @param style a style name from lv_pages_builtin_t enum
- * @param copy copy the style to this variable. (NULL if unused)
- * @return pointer to an lv_pages_t style
- */
-lv_pages_t * lv_pages_get(lv_pages_builtin_t style, lv_pages_t * copy);
 
 /**********************
  *      MACROS

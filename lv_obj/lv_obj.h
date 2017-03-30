@@ -15,6 +15,7 @@
 #include "misc/mem/dyn_mem.h"
 #include "misc/mem/linked_list.h"
 #include "misc/others/color.h"
+#include "lv_style.h"
 
 /*********************
  *      DEFINES
@@ -84,8 +85,8 @@ typedef struct __LV_OBJ_T
     lv_signal_f_t signal_f;
     lv_design_f_t design_f;
     
-    void * ext;           /*The object attributes can be extended here*/
-    void * style_p;       /*Object specific style*/
+    void * ext;                 /*The object attributes can be extended here*/
+    lv_style_t * style_p;       /*Pointer to the style*/
 
 #if LV_OBJ_FREE_P != 0
     void * free_p;        /*Application specific pointer (set it freely)*/
@@ -106,9 +107,6 @@ typedef struct __LV_OBJ_T
     cord_t ext_size;			/*EXTtend the size of the object in every direction. Used to draw shadow, shine etc.*/
 
     uint8_t free_num; 		    /*Application specific identifier (set it freely)*/
-	opa_t opa;
-
-    
 }lv_obj_t;
 
 /*Protect some attributes (max. 8 bit)*/
@@ -146,24 +144,9 @@ typedef enum
 	LV_ALIGN_OUT_RIGHT_BOTTOM,
 }lv_align_t;
 
-
-typedef struct
-{
-	color_t color;
-	uint8_t transp :1;
-}lv_objs_t;
-
-typedef enum
-{
-	LV_OBJS_DEF,
-	LV_OBJS_SCR,
-	LV_OBJS_TRANSP,
-}lv_objs_builtin_t;
-
 typedef enum
 {
 	LV_ANIM_NONE = 0,
-	LV_ANIM_FADE,			/*Animate the opacity*/
 	LV_ANIM_FLOAT_TOP, 		/*Float from/to the top*/
 	LV_ANIM_FLOAT_LEFT,		/*Float from/to the left*/
 	LV_ANIM_FLOAT_BOTTOM,	/*Float from/to the bottom*/
@@ -198,7 +181,7 @@ void lv_obj_refr_style(lv_obj_t * obj);
  * @param style pinter to a style. Only objects with this style will be notified
  *               (NULL to notify all objects)
  */
-void lv_style_refr_all(void * style);
+void lv_obj_refr_style_all(void * style);
 
 /**
  * Create a basic object
@@ -223,14 +206,6 @@ void lv_obj_del(lv_obj_t * obj);
  * @return false: the object become invalid (e.g. deleted)
  */
 bool lv_obj_signal(lv_obj_t * obj, lv_signal_t sign, void * param);
-
-/**
- * Return with a pointer to built-in style and/or copy it to a variable
- * @param style a style name from lv_objs_builtin_t enum
- * @param copy_p copy the style to this variable. (NULL if unused)
- * @return pointer to an lv_objs_t style
- */
-lv_objs_t * lv_objs_get(lv_objs_builtin_t style, lv_objs_t * copy_p);
 
 /**
  * Load a new screen
@@ -376,20 +351,6 @@ void lv_obj_set_style(lv_obj_t * obj, void * style);
  * other objects.
  */
 void * lv_obj_iso_style(lv_obj_t * obj, uint32_t style_size);
-
-/**
- * Set the opacity of an object
- * @param obj pointer to an object
- * @param opa 0 (transparent) .. 255(fully cover)
- */
-void lv_obj_set_opa(lv_obj_t * obj, uint8_t opa);
-
-/**
- * Set the opacity of an object and all of its children
- * @param obj pointer to an object
- * @param opa 0 (transparent) .. 255(fully cover)
- */
-void lv_obj_set_opar(lv_obj_t * obj, uint8_t opa);
 
 /**
  * Hide an object. It won't be visible and clickable.
@@ -590,11 +551,11 @@ cord_t lv_obj_getext_size(lv_obj_t * obj);
 void * lv_obj_get_style(lv_obj_t * obj);
 
 /**
- * Get the opacity of an object
+ * Inherit the unset field of the style of an object
  * @param obj pointer to an object
- * @return 0 (transparent) .. 255 (fully cover)
+ * @return pointer to the style of 'obj'
  */
-opa_t lv_obj_get_opa(lv_obj_t * obj);
+lv_style_t * lv_obj_load_style(lv_obj_t * obj);
 
 /**
  * Get the hidden attribute of an object
@@ -673,6 +634,18 @@ lv_signal_f_t   lv_obj_get_signal_f(lv_obj_t * obj);
  * @return the design function
  */
 lv_design_f_t lv_obj_get_design_f(lv_obj_t * obj);
+color_t lv_obj_get_ccolor(lv_obj_t * obj);
+color_t lv_obj_get_mcolor(lv_obj_t * obj);
+color_t lv_obj_get_gcolor(lv_obj_t * obj);
+cord_t lv_obj_get_lwidth(lv_obj_t * obj);
+cord_t lv_obj_get_hpad(lv_obj_t * obj);
+cord_t lv_obj_get_vpad(lv_obj_t * obj);
+cord_t lv_obj_get_opad(lv_obj_t * obj);
+const font_t * lv_obj_get_font(lv_obj_t * obj);
+cord_t lv_obj_get_letter_space(lv_obj_t * obj);
+cord_t lv_obj_get_line_space(lv_obj_t * obj);
+uint8_t lv_obj_get_txt_align(lv_obj_t * obj);
+
 
 /**
  * Get the ext pointer
@@ -700,7 +673,6 @@ void * lv_obj_get_free_p(lv_obj_t * obj);
  *      MACROS
  **********************/
 
-#define LV_SA(obj, style_type) ((style_type *) obj->style_p)
 #define LV_EA(obj, ext_type) ((ext_type *) obj->ext)
 
 #endif

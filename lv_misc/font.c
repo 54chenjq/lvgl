@@ -54,7 +54,7 @@
  * @param font_id: the id of a font (an element of font_types_t enum)
  * @return pointer to a font descriptor
  */
-const font_t * font_get(font_types_t font_id)
+const font_t * font_get(font_name_t font_id)
 {
     const font_t * font_p = NULL;
     

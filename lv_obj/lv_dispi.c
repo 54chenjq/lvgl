@@ -233,11 +233,9 @@ static void dispi_proc_press(lv_dispi_t * dispi_p)
 
         dispi_p->last_point.x = dispi_p->act_point.x;
         dispi_p->last_point.y = dispi_p->act_point.y;
-        
         /*If a new object found the previous was lost, so send a signal*/
         if(dispi_p->act_obj != NULL) {
-            dispi_p->act_obj->signal_f(dispi_p->act_obj,
-                                          LV_SIGNAL_PRESS_LOST, dispi_p);
+            dispi_p->act_obj->signal_f(dispi_p->act_obj, LV_SIGNAL_PRESS_LOST, dispi_p);
         }
         
         if(pr_obj != NULL) {
@@ -291,7 +289,7 @@ static void dispi_proc_press(lv_dispi_t * dispi_p)
             if(dispi_p->drag_in_prog == 0 && dispi_p->long_press_sent == 0) {
                 /*Send a signal about the long press if enough time elapsed*/
                 if(systick_elaps(dispi_p->press_time_stamp) > LV_DISPI_LONG_PRESS_TIME) {
-                    pr_obj->signal_f(pr_obj, LV_SIGNAL_LONG_PRESS, dispi_p);
+                    dispi_p->act_obj->signal_f(dispi_p->act_obj, LV_SIGNAL_LONG_PRESS, dispi_p);
 
                     /*Mark the signal sending to do not send it again*/
                     dispi_p->long_press_sent = 1;
@@ -304,9 +302,8 @@ static void dispi_proc_press(lv_dispi_t * dispi_p)
             if(dispi_p->drag_in_prog == 0 && dispi_p->long_press_sent == 1) {
             	/*Send a signal about the long press repeate if enough time elapsed*/
 				if(systick_elaps(dispi_p->lpr_rep_time_stamp) > LV_DISPI_LONG_PRESS_REP_TIME) {
-					pr_obj->signal_f(pr_obj, LV_SIGNAL_LONG_PRESS_REP, dispi_p);
+				    dispi_p->act_obj->signal_f(dispi_p->act_obj, LV_SIGNAL_LONG_PRESS_REP, dispi_p);
                     dispi_p->lpr_rep_time_stamp = systick_get();
-
 				}
             }
         }
@@ -329,8 +326,7 @@ static void disi_proc_release(lv_dispi_t * dispi_p)
 
     /*Forgot the act obj and send a released signal */
     if(dispi_p->act_obj != NULL) {
-        dispi_p->act_obj->signal_f(dispi_p->act_obj,
-                                      LV_SIGNAL_RELEASED, dispi_p);
+        dispi_p->act_obj->signal_f(dispi_p->act_obj, LV_SIGNAL_RELEASED, dispi_p);
         dispi_p->act_obj = NULL;   
         dispi_p->press_time_stamp = 0;
         dispi_p->lpr_rep_time_stamp = 0;

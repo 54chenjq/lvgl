@@ -330,13 +330,13 @@ static void lv_lists_init(void)
     lv_lists_def.liste_btns.flags[LV_BTN_STATE_TGL_REL].transp = 0;
     lv_lists_def.liste_btns.flags[LV_BTN_STATE_TGL_REL].empty = 0;
 
-    lv_lists_def.liste_btns.mcolor[LV_BTN_STATE_TGL_PR] = COLOR_MAKE(0x40, 0x60, 0x80);
-    lv_lists_def.liste_btns.gcolor[LV_BTN_STATE_TGL_PR] = COLOR_MAKE(0x40, 0x60, 0x80);
-    lv_lists_def.liste_btns.bcolor[LV_BTN_STATE_TGL_PR] = COLOR_MAKE(0x20, 0x30, 0x40);
-    lv_lists_def.liste_btns.lcolor[LV_BTN_STATE_TGL_PR] = COLOR_MAKE(0x30, 0x40, 0x50);
-    lv_lists_def.liste_btns.flags[LV_BTN_STATE_TGL_PR].light_en = 0;
-    lv_lists_def.liste_btns.flags[LV_BTN_STATE_TGL_PR].transp = 0;
-    lv_lists_def.liste_btns.flags[LV_BTN_STATE_TGL_PR].empty = 0;
+    lv_lists_def.liste_btns.mcolor[LV_BTN_STATE_TPR] = COLOR_MAKE(0x40, 0x60, 0x80);
+    lv_lists_def.liste_btns.gcolor[LV_BTN_STATE_TPR] = COLOR_MAKE(0x40, 0x60, 0x80);
+    lv_lists_def.liste_btns.bcolor[LV_BTN_STATE_TPR] = COLOR_MAKE(0x20, 0x30, 0x40);
+    lv_lists_def.liste_btns.lcolor[LV_BTN_STATE_TPR] = COLOR_MAKE(0x30, 0x40, 0x50);
+    lv_lists_def.liste_btns.flags[LV_BTN_STATE_TPR].light_en = 0;
+    lv_lists_def.liste_btns.flags[LV_BTN_STATE_TPR].transp = 0;
+    lv_lists_def.liste_btns.flags[LV_BTN_STATE_TPR].empty = 0;
 
     lv_lists_def.liste_btns.mcolor[LV_BTN_STATE_INA] = COLOR_SILVER;
     lv_lists_def.liste_btns.gcolor[LV_BTN_STATE_INA] = COLOR_GRAY;

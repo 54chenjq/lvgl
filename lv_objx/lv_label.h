@@ -47,26 +47,6 @@ typedef struct
     uint8_t recolor  :1;            /* Enable in-line letter recoloring*/
 }lv_label_ext_t;
 
-/*Style of label*/
-typedef struct
-{
-	lv_objs_t objs;		/*Style of ancestor*/
-	/*New style element for this type */
-    font_types_t font;      /*Name of the font. E.g: FONT_DEJAVU_20*/
-    uint16_t letter_space;
-    uint16_t line_space;
-    uint8_t mid         :1; /*1: Align the lines into the middle*/
-}lv_labels_t;
-
-/*Built-in styles of label*/
-typedef enum
-{
-	LV_LABELS_DEF,
-	LV_LABELS_BTN,
-	LV_LABELS_TXT,
-	LV_LABELS_TITLE,
-}lv_labels_builtin_t;
-
 /**********************
  * GLOBAL PROTOTYPES
  **********************/
@@ -168,14 +148,6 @@ void lv_label_get_letter_pos(lv_obj_t * label, uint16_t index, point_t * pos);
  * @return the index of the letter on the 'pos_p' point (E.g. on 0;0 is the 0. letter)
  */
 uint16_t lv_label_get_letter_on(lv_obj_t * label, point_t * pos);
-
-/**
- * Return with a pointer to a built-in style and/or copy it to a variable
- * @param style a style name from lv_labels_builtin_t enum
- * @param copy copy the style to this variable. (NULL if unused)
- * @return pointer to an lv_labels_t style
- */
-lv_labels_t * lv_labels_get(lv_labels_builtin_t style, lv_labels_t * copy);
 
 /**********************
  *      MACROS

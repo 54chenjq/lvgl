@@ -35,6 +35,7 @@ static void lv_templs_init(void);
  *  STATIC VARIABLES
  **********************/
 static lv_templs_t lv_templs_def;	/*Default template style*/
+static lv_design_f_t ancestor_design_f;
 
 /**********************
  *      MACROS
@@ -67,6 +68,9 @@ lv_obj_t * lv_templ_create(lv_obj_t * par, lv_obj_t * copy)
 
     /*Initialize the allocated 'ext' */
 
+
+    /*Save the ancestor design function if required*/
+    if(ancestor_design_f  == NULL) ancestor_design_f = lv_obj_get_design_f(new_templ);
 
     /*The signal and design functions are not copied so set them here*/
     lv_obj_set_signal_f(new_templ, lv_templ_signal);
